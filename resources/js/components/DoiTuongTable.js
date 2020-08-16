@@ -1,4 +1,4 @@
-import React, {forwardRef, useImperativeHandle} from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import { withStyles, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -18,6 +18,7 @@ import GcnthanItem from './GcnthanItem.js';
 import NhanthanItem from './NhanthanItem.js';
 import LsngheItem from './LsngheItem.js';
 import TablePagination from '@material-ui/core/TablePagination';
+import InfoIcon from '@material-ui/icons/Info';
 
 const useStyles = makeStyles({
   table: {
@@ -39,7 +40,7 @@ const LightTooltip = withStyles((theme) => ({
 }))(Tooltip);
 
 
-function SimpleTable({ doituongs, showEditDialog, showDeleteDialog }, ref) {
+function SimpleTable({ doituongs, showEditDialog, showDeleteDialog, showDetailsDialog }, ref) {
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -55,11 +56,11 @@ function SimpleTable({ doituongs, showEditDialog, showDeleteDialog }, ref) {
   };
 
   const setToFirstPage = () => {
-    if(page !== 0) {
+    if (page !== 0) {
       setPage(0);
     }
   }
- 
+
   useImperativeHandle(ref, () => ({
     setToFirstPage
   }));
@@ -74,9 +75,9 @@ function SimpleTable({ doituongs, showEditDialog, showDeleteDialog }, ref) {
             <col style={{ width: '14%' }} />
             <col style={{ width: '14%' }} />
             <col style={{ width: '12%' }} />
-            <col style={{ width: '5%' }} />
+            <col style={{ width: '3%' }} />
             <col style={{ width: '10%' }} />
-            <col style={{ width: '5%' }} />
+            <col style={{ width: '7%' }} />
           </colgroup>
           <TableHead>
             <TableRow>
@@ -112,6 +113,9 @@ function SimpleTable({ doituongs, showEditDialog, showDeleteDialog }, ref) {
                 </TableCell>
                 <TableCell>{doituong.ghichu}</TableCell>
                 <TableCell padding="none">
+                  <IconButton aria-label="edit" size="small" color="action" onClick={(e) => {showDetailsDialog(e, doituong.id)}}>
+                    <InfoIcon fontSize="inherit" />
+                  </IconButton>
                   <IconButton aria-label="edit" size="small" color="primary" onClick={(e) => { showEditDialog(e, doituong.id) }}>
                     <EditIcon fontSize="inherit" />
                   </IconButton>
@@ -133,7 +137,7 @@ function SimpleTable({ doituongs, showEditDialog, showDeleteDialog }, ref) {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
         labelRowsPerPage="Số hàng mỗi trang"
-        labelDisplayedRows={({from, to, count}) => `${from}-${to} trên ${count}`}
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} trên ${count}`}
       />
     </React.Fragment>
   );

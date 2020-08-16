@@ -21,7 +21,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import EditDialog from './EditDialog.js';
 import DeleteDialog from './DeleteDialog.js';
-import CustomizedSnackbars from './Snackbars.js';
+import DetailsDialog from './DetailsDialog.js';
+import CustomizedSnackbars from './SnackBars.js';
+
 
 const defaultMaterialTheme = createMuiTheme({
   spacing: 2,
@@ -37,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 function UtilComponents({ getDoituong, changeEditedDoituong, removeDoituong }, ref) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
     const [chosingDoituong, setChosingDoituong] = useState(null);
     const [isSuccessSnackBarOpen, setIsSuccessSnackBarOpen] = useState(false);
     const [successSnackBarContent, setSuccessSnackBarContent] = useState('');
@@ -62,6 +65,15 @@ function UtilComponents({ getDoituong, changeEditedDoituong, removeDoituong }, r
         setId(id);
     }
 
+    function showDetailsDialog(id) {
+        setIsDetailsDialogOpen(true);
+        setChosingDoituong(getDoituong(id));
+    }
+
+    function hideDetailsDialog() {
+        setIsDetailsDialogOpen(false);
+    }
+
     function showSuccessSnackBar(message) {
         setSuccessSnackBarContent(message);
         setIsSuccessSnackBarOpen(true);
@@ -74,10 +86,12 @@ function UtilComponents({ getDoituong, changeEditedDoituong, removeDoituong }, r
     useImperativeHandle(ref, () => ({
         showEditDialog,
         showSuccessSnackBar,
-        showDeleteDialog
+        showDeleteDialog,
+        showDetailsDialog
     }));
     return(
         <div>
+        <DetailsDialog open={isDetailsDialogOpen} hideDetailsDialog={hideDetailsDialog} chosingDoituong={chosingDoituong}/>
         <EditDialog isOpen={isEditDialogOpen} hideEditDialog={hideEditDialog} chosingDoituong={chosingDoituong} showSuccessSnackBar={showSuccessSnackBar} changeEditedDoituong={changeEditedDoituong}/>
         <DeleteDialog isOpen={isDeleteDialogOpen} hideDeleteDialog={hideDeleteDialog} showSuccessSnackBar={showSuccessSnackBar} hovaten={hovaten} id={id} removeDoituong={removeDoituong}/>
         <CustomizedSnackbars isOpen={isSuccessSnackBarOpen} hideSuccessSnackBar={hideSuccessSnackBar} successSnackBarContent={successSnackBarContent}/>

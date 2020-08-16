@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
     // backgroundColor: 'white',
     // color: 'green',
     // borderColor: 'green'
+    width: '50px'
   },
   // loader: {
   //   color: 'green'

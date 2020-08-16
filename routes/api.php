@@ -22,6 +22,7 @@ Route::group([
 ], function ($router) {
     Route::get('doituong', 'DoiTuongController@index');
     Route::get('user', 'AuthController@getAuthenticatedUser');
+    Route::post('changepassword', 'AuthController@changePassword');
 });
 
 Route::post('login', 'AuthController@doLogin');

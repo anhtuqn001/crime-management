@@ -28,6 +28,7 @@ Route::get('{reactRoutes}', function () {
 
 
 Route::post('/api/doituong', 'DoiTuongController@store');
+Route::post('/api/doituongs', 'DoiTuongController@storeMutipleItems');
 Route::put('/api/doituong/{id}', 'DoiTuongController@update');
 Route::delete('/api/doituong/{id}', 'DoiTuongController@destroy');
 

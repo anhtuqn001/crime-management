@@ -21,7 +21,7 @@ import SimpleTableWithRef from './DoiTuongTable.js';
 import SearchInput from './SearchInput.js';
 import SimpleBackDrop from './SimpleBackDrop.js';
 import CreateButton from './CreateButton.js';
-import CustomizedSnackbars from './Snackbars.js';
+import CustomizedSnackbars from './SnackBars.js';
 import UtilComponentsWithRef from './UtilComponent.js';
 
 
@@ -53,6 +53,10 @@ class MainContent extends React.Component {
         this.showDeleteDialog = this.showDeleteDialog.bind(this);
         this.removeDoituong = this.removeDoituong.bind(this);
         this.setToFirstPage = this.setToFirstPage.bind(this);
+        this.showDetailsDialog = this.showDetailsDialog.bind(this);
+        this.showLoader = this.showLoader.bind(this);
+        this.hideLoader = this.hideLoader.bind(this);
+        this.prepenDoituongs = this.prepenDoituongs.bind(this);
       }
 
       componentDidMount() {
@@ -108,8 +112,12 @@ class MainContent extends React.Component {
       
       showDeleteDialog(e, id, hovaten) {
         e.preventDefault();
-        console.log('showed delete dialog')
         this.UtilRef.current.showDeleteDialog(id, hovaten);
+      }
+
+      showDetailsDialog(e, id) {
+        e.preventDefault();
+        this.UtilRef.current.showDetailsDialog(id);
       }
 
       showSuccessSnackBar(message) {
@@ -131,7 +139,7 @@ class MainContent extends React.Component {
         let { doituongs } = this.state;
         let doituongToBeUpdated = doituongs.find(i => i.id == updatedDoituong.id);
         Object.keys(doituongToBeUpdated).forEach(i => {
-          doituongToBeUpdated[i] = updatedDoituong[i];
+          doituongToBeUpdated[i] = Array.isArray(updatedDoituong[i]) ? [...updatedDoituong[i]] : updatedDoituong[i];
         })
         this.setState({
           doituongs : [...doituongs]
@@ -150,9 +158,28 @@ class MainContent extends React.Component {
         this.TableRef.current.setToFirstPage();
       }
 
+      showLoader() {
+        this.setState({
+          isLoaded: true
+        })
+      }
+
+      hideLoader() {
+        this.setState({
+          isLoaded: false
+        })
+      }
+
+      prepenDoituongs(doituongsArr) {
+        let { doituongs } = this.state;
+        this.setState({
+          doituongs: [...doituongsArr.reverse(), ...doituongs]
+        })
+      }
+
     render() {
     let { doituongs, searchKey, isLoaded } = this.state;
-    doituongs = doituongs.filter(d => d.hovaten.toLowerCase().includes(searchKey.toLowerCase()) || d.tenthuonggoi.toLowerCase().includes(searchKey.toLowerCase()));
+    doituongs = doituongs.filter(d => d.hovaten.toLowerCase().includes(searchKey.toLowerCase()) || (!!d.tenthuonggoi && d.tenthuonggoi.toLowerCase().includes(searchKey.toLowerCase())));
       return (
         <Box mt={1}>
         <Container maxWidth="lg" component={Paper}>
@@ -164,11 +191,11 @@ class MainContent extends React.Component {
               <Grid item sm={3}> 
               <SearchInput handleTimKiemInputChange={this.handleTimKiemInputChange}/>
               </Grid>
-              <Grid item sm={2}>
-                <CreateButton showCreateModal={this.showCreateModal} showSuccessSnackBar={this.showSuccessSnackBar} prependDoituong={this.prependDoituong}/> 
+              <Grid container sm={3} justify="flex-end">
+                <CreateButton showCreateModal={this.showCreateModal} showSuccessSnackBar={this.showSuccessSnackBar} prependDoituong={this.prependDoituong} showSuccessSnackBar={this.showSuccessSnackBar} prepenDoituongs={this.prepenDoituongs}/> 
               </Grid>
             </Grid>
-            {<SimpleTableWithRef ref={this.TableRef} doituongs={doituongs} showEditDialog={this.showEditDialog} showDeleteDialog={this.showDeleteDialog} />}
+            {<SimpleTableWithRef ref={this.TableRef} doituongs={doituongs} showEditDialog={this.showEditDialog} showDeleteDialog={this.showDeleteDialog} showDetailsDialog={this.showDetailsDialog} />}
         </Container>
         </Box>
       );

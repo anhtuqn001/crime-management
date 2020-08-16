@@ -71,4 +71,13 @@ class AuthController extends Controller
             'user' => $user
         ]);
     }
+
+    public function changePassword(Request $request){
+        $user = User::findOrFail($request->input('idTaikhoan'));
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+        return response()->json([
+            'success' => $user
+        ], Response::HTTP_OK);
+    }
 }

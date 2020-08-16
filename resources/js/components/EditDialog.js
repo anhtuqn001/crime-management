@@ -21,11 +21,14 @@ import { ThemeProvider } from "@material-ui/styles";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { convertToRightDate } from '../Utilities/utils.js';
+import { convertToRightDate, convertFromStringToDate } from '../Utilities/utils.js';
 import { debounce } from '../Utilities/utils.js';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import Divider from '@material-ui/core/Divider';
+import ClearIcon from '@material-ui/icons/Clear';
+import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import { Alert } from '@material-ui/lab';
 
 const defaultMaterialTheme = createMuiTheme({
   spacing: 2,
@@ -33,10 +36,30 @@ const defaultMaterialTheme = createMuiTheme({
 
 const useStyles = makeStyles((theme) => ({
   button: {
-    margin: theme.spacing(1)
+    margin: theme.spacing(1),
+    padding: '5px',
+    width: '89px'
   },
   addButton: {
     color: 'green'
+  },
+  upload: {
+    margin: theme.spacing(1),
+    // backgroundColor: 'white',
+    // color: 'green',
+    // borderColor: 'green',
+    margin: 0
+  },
+  alert: {
+    '& .MuiAlert-message': {
+      padding: 0,
+      display: 'flex',
+      justifyContent: 'center',
+      flexDirection: 'column'
+    },
+    '& .MuiTypography-caption': {
+      marginBottom: 0
+    }
   }
 }));
 
@@ -50,9 +73,11 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
   const [gioitinhnam, setGioitinhnam] = useState(false);
   const [gcnthan, setGCNTHAn] = useState('');
   const [nhanthan, setNhanthan] = useState('');
+  const [lsnghe, setLsnghe] = useState('');
   const [ghichu, setGhichu] = useState('');
   const [isLoading, setLoader] = useState(false);
   const [tenhinhanhs, setTenhinhanhs] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   const hovatenInputRef = useRef();
   const tenthuonggoiInputRef = useRef();
@@ -66,22 +91,13 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
   useEffect(() => {
     if (chosingDoituong != null) {
       setHovaten(chosingDoituong.hovaten);
-      setTenthuonggoi(chosingDoituong.tenthuonggoi);
+      setTenthuonggoi(chosingDoituong.tenthuonggoi != null ? chosingDoituong.tenthuonggoi : '');
       setNgaysinh(new Date(getDateFormat(chosingDoituong.ngaysinh)));
       setGioitinhnam(!!chosingDoituong.gioitinhnam);
-      setGCNTHAn(chosingDoituong.gcnthan);
-      setNhanthan(chosingDoituong.nhanthan);
-      setGhichu(chosingDoituong.ghichu);
-      // console.log(chosingDoituong.tenthuonggoi);
-      // tenthuonggoiInputRef.current.value = chosingDoituong.tenthuonggoi;
-      // console.log(!!chosingDoituong.gioitinhnam);
-      // gioitinhnamInputRef.current.checked = !!chosingDoituong.gioitinhnam;
-      // console.log(chosingDoituong.gcnthan);
-      // gcnthanInputRef.current.value = chosingDoituong.gcnthan;
-      // console.log(chosingDoituong.nhanthan);
-      // nhanthanInputRef.current.value = chosingDoituong.nhanthan;
-      // console.log(chosingDoituong.ghichu);
-      // ghichuInputRef.current.value = chosingDoituong.ghichu;
+      setGCNTHAn(chosingDoituong.gcnthan != null ? chosingDoituong.gcnthan : '');
+      setNhanthan(chosingDoituong.nhanthan != null ? chosingDoituong.nhanthan : '');
+      setLsnghe(chosingDoituong.lsnghe != null ? chosingDoituong.lsnghe : '');
+      setGhichu(chosingDoituong.ghichu != null ? chosingDoituong.ghichu : '');
       setTenhinhanhs([...chosingDoituong.hinhanhs]);
     }
   }, [JSON.stringify(chosingDoituong)])
@@ -128,11 +144,26 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
     setGhichu(event.target.value);
   }
 
+  function handleLsngheInputChange(event) {
+    event.preventDefault();
+    setLsnghe(event.target.value);
+  }
+
 
   function submitInputs(event) {
     event.preventDefault();
+    if(hovaten.length == 0 || ngaysinh == null) {
+      let errors = []
+      if(hovaten.length == 0){
+        errors.push('Họ tên không được để trống!');
+      }
+      if(ngaysinh == null){
+        errors.push('Ngày sinh không được để trống!');
+      }
+      setErrors([...errors])
+      return; 
+    }
     setLoader(true);
-    console.log(ngaysinh);
     var data = new FormData();
     data.append('_method', 'PUT');
     data.append('hovaten', hovaten);
@@ -141,8 +172,25 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
     data.append('gioitinhnam', gioitinhnam);
     data.append('gcnthan', gcnthan);
     data.append('nhanthan', nhanthan);
+    data.append('lsnghe', lsnghe);
     data.append('ghichu', ghichu);
-    data.append('hinhanh', hinhanhInputRef.current.hinhanh);
+
+    hinhanhInputRef.current.hinhanh.filter((i, index) => i != null || hinhanhInputRef.current.timesChange[index] != null || hinhanhInputRef.current.times[index] == null).forEach(i => {
+      data.append('hinhanhstr[]', i == null ? 'null' : 'notnull');
+      data.append('hinhanh[]', i);
+    })
+
+    hinhanhInputRef.current.hinhanh.forEach((item, index) => {
+      if (item != null || hinhanhInputRef.current.timesChange[index] != null || hinhanhInputRef.current.times[index] == null) {
+        data.append('id[]', hinhanhInputRef.current.id[index]);
+        data.append('thoigian[]', hinhanhInputRef.current.times[index] == null ? null : convertToRightDate(hinhanhInputRef.current.times[index]).toISOString().slice(0, 10));
+      }
+    })
+
+    for (var pair of data.entries()) {
+      console.log(pair[0] + ', ' + pair[1]);
+    }
+
     fetch('/api/doituong/' + chosingDoituong.id, {
       method: 'post',
       headers: {
@@ -153,13 +201,21 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
       .then((response) => response.json())
       .then((data) => {
         setLoader(false);
-        hideEditDialog();
+        // console.log(data);
+        hideEditDialogChild();
         showSuccessSnackBar("Cập nhật đối tượng thành công !");
         changeEditedDoituong(data.success);
       })
       .catch((error) => {
         console.log('Request failed', error);
       });
+  }
+
+  function hideEditDialogChild() {
+    hideEditDialog();
+    if(errors.length > 0) {
+      setErrors([]);
+    }
   }
 
   return (
@@ -209,6 +265,7 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
                   onChange={date => {
                     setNgaysinh(date);
                   }}
+                  invalidDateMessage="Sai định dạng"
                 />
               </MuiPickersUtilsProvider>
             </ThemeProvider>
@@ -273,6 +330,22 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
         </Grid>
         <Grid container spacing={2}>
           <Grid item sm={12}>
+            <InputLabel>Lịch Sử Nghề Nghiệp</InputLabel>
+            <OutlinedInput
+              multiline
+              rows={2}
+              rowsMax={4}
+              color="primary"
+              fullWidth
+              notched={false}
+              onChange={handleLsngheInputChange}
+              value={lsnghe}
+            // inputRef={nhanthanInputRef}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={2}>
+          <Grid item sm={12}>
             <InputLabel htmlFor="my-input">Ghi Chú</InputLabel>
             <OutlinedInput
               multiline
@@ -290,12 +363,29 @@ function EditDialog({ isOpen, hideEditDialog, chosingDoituong, showSuccessSnackB
         <HinhanhInputWithRef ref={hinhanhInputRef} tenhinhanhs={tenhinhanhs} />
       </DialogContent>
       <DialogActions>
-        <Button color="primary" variant="outlined" onClick={submitInputs} className={classes.button} disabled={isLoading}>
+        <Grid container justify="space-between">
+          <Grid item sm={8}>
+            {errors != null && errors.length > 0 ? <Alert severity="error" className={classes.alert}>{errors.map(i =>
+              <Typography variant="caption" display="block" gutterBottom>
+                - {i}
+              </Typography>
+            )}</Alert> : ''}
+          </Grid>
+          <Grid item sm={4}>
+            <Button color="primary" variant="outlined" onClick={submitInputs} className={classes.button} disabled={isLoading}>
+              {isLoading ? <CircularProgress color="primary" size={24} /> : "Cập nhật"}
+            </Button>
+            <Button variant="outlined" onClick={hideEditDialogChild}>
+               Hủy Bỏ
+            </Button> 
+          </Grid>
+        </Grid>
+        {/* <Button color="primary" variant="outlined" onClick={submitInputs} className={classes.button} disabled={isLoading}>
           {isLoading ? <CircularProgress color="primary" size={24} /> : "Cập Nhật"}
         </Button>
         <Button variant="outlined" onClick={hideEditDialog}>
           Hủy Bỏ
-            </Button>
+        </Button> */}
       </DialogActions>
     </Dialog>
   );
@@ -306,27 +396,57 @@ const HinhanhInputWithRef = forwardRef(HinhanhInput);
 function HinhanhInput({ tenhinhanhs }, ref) {
   const classes = useStyles();
   const [file, setFile] = useState(tenhinhanhs.map(i => null));
-  const [hinhanh, setHinhanh] = useState(null);
-  const [times, setTimes] = useState(tenhinhanhs.map(i => i.thoigian));
+  const [hinhanh, setHinhanh] = useState(tenhinhanhs.map(i => null));
+  const [items, setItems] = useState([...tenhinhanhs]);
+  const [id, setId] = useState(tenhinhanhs.map(i => i.id));
+  const [times, setTimes] = useState(tenhinhanhs.map(i => convertFromStringToDate(i.thoigian)));
+  const [timesChange, setTimesChange] = useState(tenhinhanhs.map(i => null));
 
 
   function handleImgFileChange(e, index) {
     let newArrFile = [...file];
     newArrFile[index] = URL.createObjectURL(e.target.files[0]);
     setFile([...newArrFile]);
-    // setHinhanh(event.target.files[0]);
-    console.log(file);
-    
+    let newArrHinhanh = [...hinhanh];
+    newArrHinhanh[index] = e.target.files[0];
+    setHinhanh([...newArrHinhanh]);
   }
 
   function handleDateChange(date, index) {
     let newArrTimes = [...times];
     newArrTimes[index] = date;
     setTimes([...newArrTimes]);
+    let newArrTimesChange = [...timesChange];
+    newArrTimesChange[index] = date;
+    setTimesChange([...newArrTimesChange]);
+  }
+
+  function handleAddButton(e) {
+    e.preventDefault();
+    let length = items.length;
+    let newItem = parseInt(items[items.length - 1]) + 1;
+    setItems([...items, {}]);
+    setFile([...file, null]);
+    setId([...id, 'add']);
+    setHinhanh([...hinhanh, null]);
+    setTimes([...times, new Date()]);
+  }
+
+  function handleRemoveItem(e, index) {
+    e.preventDefault();
+    let newArrTimes = [...times];
+    newArrTimes[index] = null;
+    setTimes([...newArrTimes]);
+    let newArrItems = [...items];
+    newArrItems[index] = null;
+    setItems([...newArrItems]);
   }
 
   useImperativeHandle(ref, () => ({
-    hinhanh
+    hinhanh,
+    id,
+    times,
+    timesChange
   }));
 
   return (
@@ -345,44 +465,73 @@ function HinhanhInput({ tenhinhanhs }, ref) {
           <InputLabel>Hình Ảnh</InputLabel>
         </Grid>
         <Grid item sm={1}>
-          <IconButton>
+          <IconButton onClick={handleAddButton}>
             <AddCircleIcon className={classes.addButton} />
           </IconButton>
         </Grid>
       </Grid>
-      {tenhinhanhs.map((item, index)=>
-        <React.Fragment>
+      {items.map((item, index) => {
+        return item == null ? <React.Fragment></React.Fragment> : <React.Fragment>
           <Grid container spacing={2}>
             <Grid item sm={6}>
-              <TextField type="file" onChange={(e) => {
-                e.preventDefault();
-                handleImgFileChange(e, index);
-              }} />
+              <Grid container justify={"flex-end"}>
+                <Grid item sm={1}>
+                  <TextField type="file" id={"file-edit-" + index} style={{ display: "none" }} onChange={(e) => {
+                    e.preventDefault();
+                    handleImgFileChange(e, index);
+                  }} />
+                  <IconButton
+                    aria-label="delete"
+                    size="small"
+                    color="secondary"
+                    onClick={(e) => { handleRemoveItem(e, index) }}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </Grid>
+              </Grid>
               <Box mt={1}>
-                <ThemeProvider theme={defaultMaterialTheme}>
-                  <MuiPickersUtilsProvider utils={DateFnsUtils} locale={viLocale}>
-                    <KeyboardDatePicker
-                      autoOk
-                      variant="inline"
-                      label="Ngày"
-                      format="dd/MM/yyyy"
-                      padding="small"
-                      margin="dense"
-                      onChange={(date) => {
-                        handleDateChange(date, index)
-                      }}
-                      value={times[index]}
-                    />
-                  </MuiPickersUtilsProvider>
-                </ThemeProvider>
+                <Grid container justify="space-around">
+                  <Grid item sm={7}>
+                    <ThemeProvider theme={defaultMaterialTheme}>
+                      <MuiPickersUtilsProvider utils={DateFnsUtils} locale={viLocale}>
+                        <KeyboardDatePicker
+                          autoOk
+                          variant="inline"
+                          label="Ngày"
+                          format="dd/MM/yyyy"
+                          padding="small"
+                          margin="dense"
+                          onChange={(date) => {
+                            handleDateChange(date, index)
+                          }}
+                          value={times[index]}
+                        />
+                      </MuiPickersUtilsProvider>
+                    </ThemeProvider>
+                  </Grid>
+                  <Grid item sm={4}>
+                    <label htmlFor={"file-edit-" + index}>
+                      <IconButton color="primary" className={classes.upload} component="span">
+                        <AddPhotoAlternateIcon fontSize="large" />
+                      </IconButton>
+                    </label>
+                  </Grid>
+                </Grid>
+                {/* <Grid item sm={5}>
+                  <IconButton onClick={handleAddButton}>
+                    <AddCircleIcon className={classes.addButton} />
+                  </IconButton>
+                </Grid> */}
               </Box>
             </Grid>
             <Grid item sm={6}>
-              <img src={file[index] != null ? file[index] : '/images/' + item.hinhanh} style={{ height: 'auto', width: 'auto', maxWidth: '100%' }} />
+              <img src={file[index] != null ? file[index] : (item.hinhanh != null ? '/images/' + item.hinhanh : null)} style={{ height: 'auto', width: 'auto', maxWidth: '100%' }} />
             </Grid>
           </Grid>
           <Divider />
         </React.Fragment>
+      }
       )}
     </Box>
   );

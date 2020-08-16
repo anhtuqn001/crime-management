@@ -33,6 +33,7 @@ function MainPage() {
     const [auth, setAuth] = useState(false);
     const [isTokenValidated, setIsTokenValidated] = useState(false);
     const [tendangnhap, setTendangnhap] = useState('');
+    const [idTaikhoan, setIdTaikhoan] = useState('');
     let history = useHistory();
 
     useEffect(() => {
@@ -53,6 +54,7 @@ function MainPage() {
                     if (result.success) {
                         setAuth(true);
                         setTendangnhap(result.user.name);
+                        setIdTaikhoan(result.user.id);
                     }
                 })
                 .catch((err) => {
@@ -74,7 +76,7 @@ function MainPage() {
 
     return (
         <div>
-            <NavigationBar tendangnhap={tendangnhap}/>
+            <NavigationBar tendangnhap={tendangnhap} idTaikhoan={idTaikhoan}/>
             <MainContent history={history} />
         </div>
     );

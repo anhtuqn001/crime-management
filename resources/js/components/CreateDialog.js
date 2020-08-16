@@ -25,8 +25,12 @@ import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import {convertToRightDate} from '../Utilities/utils.js';
-
+import { convertToRightDate } from '../Utilities/utils.js';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ClearIcon from '@material-ui/icons/Clear';
+import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
+import AddPhotoAlternateIcon from '@material-ui/icons/AddPhotoAlternate';
+import { Alert } from '@material-ui/lab';
 
 const defaultMaterialTheme = createMuiTheme({
   spacing: 2,
@@ -37,7 +41,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: 'white',
     color: 'green',
-    borderColor: 'green'
+    borderColor: 'green',
+    padding: '5px 10px',
+    width: '82px'
   },
   loader: {
     color: 'green'
@@ -50,6 +56,24 @@ const useStyles = makeStyles((theme) => ({
   selected: {},
   addButton: {
     color: 'green'
+  },
+  upload: {
+    margin: theme.spacing(1),
+    backgroundColor: 'white',
+    color: 'green',
+    borderColor: 'green',
+    margin: 0
+  },
+  alert: {
+    '& .MuiAlert-message': {
+      padding: 0,
+      display: 'flex',
+      justifyContent: 'center',
+      flexDirection: 'column'
+    },
+    '& .MuiTypography-caption': {
+      marginBottom: 0
+    }
   }
 }));
 
@@ -83,24 +107,38 @@ function a11yProps(index) {
 
 
 
-const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar, prependDoituong }) => {
-  console.log('abc');
+// const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar, prependDoituong }) =>
+function CreateDialog({ isOpen, hideCreateDialog, showSuccessSnackBar, prependDoituong }) {
   const classes = useStyles();
 
   const [ngaysinh, setNgaysinh] = useState(new Date());
   const [isLoading, setLoader] = useState(false);
+  const [errors, setErrors] = useState([]);
 
   const hovatenInputRef = useRef();
   const tenthuonggoiInputRef = useRef();
   const gioitinhnamInputRef = useRef();
   const gcnthanInputRef = useRef();
   const nhanthanInputRef = useRef();
+  const lsngheInputRef = useRef();
   const ghichuInputRef = useRef();
   const hinhanhInputRef = useRef();
 
 
+
   function submitInputs(event) {
     event.preventDefault();
+    if(hovatenInputRef.current.value.length == 0 || ngaysinh == null) {
+      let errors = []
+      if(hovatenInputRef.current.value.length == 0){
+        errors.push('Họ tên không được để trống!');
+      }
+      if(ngaysinh == null){
+        errors.push('Ngày sinh không được để trống!');
+      }
+      setErrors([...errors])
+      return; 
+    }
     setLoader(true);
     var data = new FormData();
     data.append('hovaten', hovatenInputRef.current.value);
@@ -109,18 +147,19 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
     data.append('gioitinhnam', gioitinhnamInputRef.current.checked);
     data.append('gcnthan', gcnthanInputRef.current.value);
     data.append('nhanthan', nhanthanInputRef.current.value);
+    data.append('lsnghe', lsngheInputRef.current.value);
     data.append('ghichu', ghichuInputRef.current.value);
     hinhanhInputRef.current.hinhanh.filter(i => i != null).forEach(i => {
       data.append('hinhanh[]', i);
     })
     hinhanhInputRef.current.hinhanh.forEach((item, index) => {
-      if(item != null) {
+      if (item != null) {
         data.append('thoigian[]', convertToRightDate(hinhanhInputRef.current.times[index]).toISOString().slice(0, 10));
       }
     })
 
     for (var pair of data.entries()) {
-      console.log(pair[0]+ ', ' + pair[1]); 
+      console.log(pair[0] + ', ' + pair[1]);
     }
     fetch('/api/doituong', {
       method: 'post',
@@ -132,7 +171,7 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
       .then((response) => response.json())
       .then((data) => {
         setLoader(false);
-        hideCreateDialog();
+        hideCreateDialogChild();
         showSuccessSnackBar("Tạo mới đối tượng thành công !");
         prependDoituong(data.success);
       })
@@ -141,7 +180,17 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
       });
   }
 
+  function hideCreateDialogChild() {
+    hideCreateDialog();
+    if(errors.length > 0) {
+      setErrors([]);
+    }
+  }
 
+  useEffect(() => {
+    
+  })
+  
   return (
     <Dialog open={isOpen} aria-labelledby="form-dialog-title" fullWidth={true} maxWidth="sm">
       <DialogTitle id="form-dialog-title">Tạo Mới Đối Tượng</DialogTitle>
@@ -181,6 +230,7 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
                   format="dd/MM/yyyy"
                   padding="small"
                   margin="dense"
+                  invalidDateMessage="Sai định dạng"
                   onChange={(date) => {
                     setNgaysinh(date);
                   }}
@@ -207,6 +257,7 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
                     style={{ padding: '4px', paddingLeft: '15px' }}
                     value="Nam"
                     inputRef={gioitinhnamInputRef}
+                    defaultChecked={true}
                   />
                 }
                 label="Nam"
@@ -239,6 +290,22 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
               fullWidth
               notched={false}
               inputRef={nhanthanInputRef}
+              defaultValue="- Thường trú:&#013;- Dân tộc:&#013;- Tôn giáo:&#013;- Họ tên cha:&#013;- Nghề nghiệp cha:&#013;- Họ tên mẹ:&#013;- Nghề nghiệp mẹ:"
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={2}>
+          <Grid item sm={12}>
+            <InputLabel>Lịch Sử Nghề Nghiệp</InputLabel>
+            <OutlinedInput
+              multiline
+              rows={2}
+              rowsMax={4}
+              color="primary"
+              fullWidth
+              notched={false}
+              inputRef={lsngheInputRef}
+              defaultValue="-Nghề nghiệp (từ  đến  ): "
             />
           </Grid>
         </Grid>
@@ -267,16 +334,27 @@ const CreateDialog = React.memo(({ isOpen, hideCreateDialog, showSuccessSnackBar
 
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" onClick={submitInputs} className={classes.button} disabled={isLoading}>
-          {isLoading ? <CircularProgress color="primary" size={24} className={classes.loader} /> : "Tạo Mới"}
-        </Button>
-        <Button variant="outlined" onClick={hideCreateDialog}>
-          Hủy Bỏ
+        <Grid container justify="space-between">
+          <Grid item sm={8}>
+        {errors != null && errors.length > 0 ? <Alert severity="error" className={classes.alert}>{errors.map(i => 
+            <Typography variant="caption" display="block" gutterBottom>
+                - {i}
+            </Typography>
+          )}</Alert> : ''}
+          </Grid>
+          <Grid item sm={4}>
+            <Button variant="outlined" onClick={submitInputs} className={classes.button} disabled={isLoading}>
+              {isLoading ? <CircularProgress color="primary" size={24} className={classes.loader} /> : "Tạo Mới"}
             </Button>
+            <Button variant="outlined" onClick={hideCreateDialogChild}>
+              Hủy Bỏ
+            </Button>
+          </Grid>
+        </Grid>
       </DialogActions>
     </Dialog>
   );
-})
+}
 
 const HinhanhInputWithRef = forwardRef(HinhanhInput)
 
@@ -309,12 +387,21 @@ function HinhanhInput(props, ref) {
 
   function handleAddButton(e) {
     e.preventDefault();
-      let length = items.length;
-      let newItem = parseInt(items[items.length - 1]) + 1;
-      setItems([...items, newItem.toString()]);
-      setFile([...file, null]);
-      setHinhanh([...hinhanh, null]);
-      setTimes([...times, new Date()]);
+    let length = items.length;
+    let newItem = parseInt(items[items.length - 1]) + 1;
+    setItems([...items, newItem.toString()]);
+    setFile([...file, null]);
+    setHinhanh([...hinhanh, null]);
+    setTimes([...times, new Date()]);
+    console.log(items);
+  }
+
+  function handleRemoveItem(e, index) {
+    e.preventDefault();
+    setItems([...items.filter((it, ind) => ind != index)]);
+    setFile([...file.filter((it, ind) => ind != index)]);
+    setHinhanh([...hinhanh.filter((it, ind) => ind != index)]);
+    setTimes([...times.filter((it, ind) => ind != index)]);
   }
 
   return (
@@ -339,39 +426,62 @@ function HinhanhInput(props, ref) {
           </Grid>
       </Grid> */}
       {items.map((item, index) =>
-        <React.Fragment>
-        <Grid container spacing={2}>
-          <Grid item sm={6}>
-            <TextField type="file" onChange={(e) => {
-              e.preventDefault();
-              handleImgFileChange(e, index);
-            }} />
-            <Box mt={1}>
-            <ThemeProvider theme={defaultMaterialTheme}>
-              <MuiPickersUtilsProvider utils={DateFnsUtils} locale={viLocale}>
-                <KeyboardDatePicker
-                  autoOk
-                  variant="inline"
-                  label="Ngày"
-                  format="dd/MM/yyyy"
-                  padding="small"
-                  margin="dense"
-                  onChange={(date) => {
-                    handleDateChange(date, index)
-                  }}
-                  value={times[index]}
-                />
-              </MuiPickersUtilsProvider>
-            </ThemeProvider>
-            </Box>
+        <React.Fragment key={item}>
+          <Grid container spacing={2}>
+            <Grid item sm={6}>
+              <Divider />
+              <Grid container justify="flex-end">
+                <Grid item sm={1}>
+                  <TextField type="file" id={"file-create-" + index} style={{ display: 'none' }} onChange={(e) => {
+                    e.preventDefault();
+                    handleImgFileChange(e, index);
+                  }} />
+                  <IconButton
+                    aria-label="delete"
+                    size="small"
+                    color="secondary"
+                    onClick={(e) => { handleRemoveItem(e, index) }}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                </Grid>
+              </Grid>
+              <Box>
+                <Grid container justify="space-around">
+                  <Grid item sm={7}>
+                    <ThemeProvider theme={defaultMaterialTheme}>
+                      <MuiPickersUtilsProvider utils={DateFnsUtils} locale={viLocale}>
+                        <KeyboardDatePicker
+                          autoOk
+                          variant="inline"
+                          label="Ngày"
+                          format="dd/MM/yyyy"
+                          padding="small"
+                          margin="dense"
+                          onChange={(date) => {
+                            handleDateChange(date, index)
+                          }}
+                          value={times[index]}
+                        />
+                      </MuiPickersUtilsProvider>
+                    </ThemeProvider>
+                  </Grid>
+                  <Grid item sm={4}>
+                    <label htmlFor={"file-create-" + index}>
+                      <IconButton color="primary" className={classes.upload} component="span">
+                        <AddPhotoAlternateIcon fontSize="large" />
+                      </IconButton>
+                    </label>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+            <Grid item sm={6}>
+              <img src={file[index]} style={{ height: 'auto', width: 'auto', maxWidth: '100%' }} />
+            </Grid>
           </Grid>
-          <Grid item sm={6}>
-            <img src={file[index]} style={{ height: 'auto', width: 'auto', maxWidth: '100%' }} />
-          </Grid>
-        </Grid>
-        <Divider />
         </React.Fragment>
-        )}
+      )}
     </Box>
   );
 }

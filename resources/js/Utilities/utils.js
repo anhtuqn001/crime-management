@@ -18,3 +18,7 @@ export function debounce(fn, delay) {
       }, delay);
   }
 }
+
+export function convertFromStringToDate(stringDate) {;
+  return new Date(stringDate.split("/").reverse().join("-"));
+}

@@ -15,13 +15,14 @@ import Container from '@material-ui/core/Container';
 import logo1 from '../../../public/images/logo1.png';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CustomizedSnackbars from './SnackBars.js';
 
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © '}
+            {'Bản quyền © '}
             <Link color="inherit" href="https://material-ui.com/">
-                Your Website
+                Lihanet
       </Link>{' '}
             {new Date().getFullYear()}
             {'.'}
@@ -55,10 +56,12 @@ const useStyles = makeStyles((theme) => ({
 function SignUpPage() {
     const classes = useStyles();
 
-    const [tendangnhap, setTendangnhap] = useState();
-    const [email, setEmail] = useState();
-    const [password, setPassword] = useState();
+    const [tendangnhap, setTendangnhap] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [isLoading, setLoader] = useState(false);
+    const [isSuccessSnackBarOpen , setSnackBar] = useState(false);
+    const [successSnackBarContent, setSnackBarContent] = useState('');
 
     function handleTendangnhapChange(event) {
         event.preventDefault();
@@ -86,23 +89,41 @@ function SignUpPage() {
         fetch('/api/signup', {
             method: 'post',
             headers: {
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-              'Content-Type': 'application/json'
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-          })
-          .then((response) => response.json())
-          .then((resData) => {
-            console.log(resData);
-            setLoader(false);
-          })
-          .catch((error) => {
-            console.log('Request failed', error);
-          });
+        })
+            .then((response) => response.json())
+            .then((resData) => {
+                console.log(resData);
+                clearInputsContent();
+                setLoader(false);
+                showSuccessSnackBar("Tạo tài khoản mới thành công!");
+            })
+            .catch((error) => {
+                console.log('Request failed', error);
+            });
+    }
+
+    function showSuccessSnackBar(message) {
+        setSnackBarContent(message);
+        setSnackBar(true);
+    }
+
+    function hideSuccessSnackBar() {
+        setSnackBar(false);
+    }
+
+    function clearInputsContent() {
+        setTendangnhap('');
+        setEmail('');
+        setPassword('');
     }
 
     return (
         <Container component="main" maxWidth="xs">
+            <CustomizedSnackbars isOpen={isSuccessSnackBarOpen} hideSuccessSnackBar={hideSuccessSnackBar} successSnackBarContent={successSnackBarContent} />
             <CssBaseline />
             <div className={classes.paper}>
                 {/* <Avatar className={classes.avatar}>
@@ -114,7 +135,11 @@ function SignUpPage() {
                 <Typography component="h1" variant="h5">
                     PHẦN MỀM QUẢN LÝ ĐỐI TƯỢNG
                 </Typography>
-                <Grid container spacing={2}>
+                <Box mt={2}>
+                    <Typography component="h1" variant="h5" color="primary">
+                        ĐĂNG KÝ
+                    </Typography>
+                </Box>
                     {/* <Grid item xs={12} sm={6}>
                 <TextField
                   autoComplete="fname"
@@ -138,7 +163,7 @@ function SignUpPage() {
                   autoComplete="lname"
                 />
               </Grid> */}
-                    <Grid item xs={12}>
+                <form className={classes.form} noValidate onSubmit={register}>
                         <TextField
                             variant="outlined"
                             required
@@ -148,9 +173,9 @@ function SignUpPage() {
                             name="tendangnhap"
                             autoComplete="tendangnhap"
                             onChange={handleTendangnhapChange}
+                            value={tendangnhap}
                         />
-                    </Grid>
-                    <Grid item xs={12}>
+                    <Box mt={1}>
                         <TextField
                             variant="outlined"
                             required
@@ -160,9 +185,10 @@ function SignUpPage() {
                             name="email"
                             autoComplete="email"
                             onChange={handleEmailChange}
+                            value={email}
                         />
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Box>
+                    <Box mt={1}>
                         <TextField
                             variant="outlined"
                             required
@@ -173,29 +199,31 @@ function SignUpPage() {
                             id="password"
                             autoComplete="current-password"
                             onChange={handlePasswordChange}
+                            value={password}
                         />
-                    </Grid>
+                    </Box>
                     {/* <Grid item xs={12}>
                 <FormControlLabel
                   control={<Checkbox value="allowExtraEmails" color="primary" />}
                   label="I want to receive inspiration, marketing promotions and updates via email."
                 />
               </Grid> */}
-                </Grid>
                 <Button
+                    type="submit"
                     fullWidth
                     variant="contained"
                     color="primary"
                     className={classes.submit}
-                    onClick={register}
+                    disabled={isLoading}
                 >
-                    {isLoading ? <CircularProgress size={24} className={classes.loader}/> : "Đăng Ký"}
-            </Button>
+                    {isLoading ? <CircularProgress size={24} className={classes.loader} /> : "Đăng Ký"}
+                </Button>
+                </form>
                 <Grid container justify="flex-end">
                     <Grid item>
                         <Link href="/dangnhap" variant="body2">
                             Đã có tài khoản ? Đăng nhập
-                </Link>
+                        </Link>
                     </Grid>
                 </Grid>
             </div>

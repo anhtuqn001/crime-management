@@ -20,9 +20,9 @@ import { useHistory } from "react-router-dom";
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
+      {'Bản quyền © '}
       <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+        Lihanet
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -122,6 +122,11 @@ function LoginPage() {
         <Typography component="h1" variant="h5">
           PHẦN MỀM QUẢN LÝ ĐỐI TƯỢNG
         </Typography>
+        <Box mt={2}>
+          <Typography component="h1" variant="h5" color="primary">
+            ĐĂNG NHẬP
+          </Typography>
+        </Box>
         <form className={classes.form} noValidate onSubmit={doLogin}>
           <TextField
             variant="outlined"
@@ -141,10 +146,10 @@ function LoginPage() {
             type="password"
             onChange={handlePasswordChange}
           />
-          <FormControlLabel
+          {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Ghi Nhớ"
-          />
+          /> */}
           {isErrorShowed
            ? <Alert variant="filled" severity="error">
             Tên đăng nhập hoặc mật khẩu không đúng — <strong>Vui lòng kiểm tra lại!</strong>
