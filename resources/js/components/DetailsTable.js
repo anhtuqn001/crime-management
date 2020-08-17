@@ -10,6 +10,10 @@ import Paper from '@material-ui/core/Paper';
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
+import Avatar from '@material-ui/core/Avatar';
+import Chip from '@material-ui/core/Chip';
+import FaceIcon from '@material-ui/icons/Face';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 const useStyles = makeStyles({
     table: {
         minWidth: 650,
@@ -70,31 +74,31 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow>
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            Họ Tên
+                                Họ Tên
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={classes.bordered}>{chosingDoituong.hovaten}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell component="th" className={classes.bordered}>
-                        <Typography variant="subtitle2">
-                            Tên Thường Gọi
+                            <Typography variant="subtitle2">
+                                Tên Thường Gọi
                         </Typography>
                         </TableCell>
                         <TableCell align="left" className={classes.bordered}>{chosingDoituong.tenthuonggoi}</TableCell>
                     </TableRow>
                     <TableRow >
                         <TableCell component="th" className={classes.bordered}>
-                        <Typography variant="subtitle2">
-                            Giới Tính
+                            <Typography variant="subtitle2">
+                                Giới Tính
                         </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>{chosingDoituong.gioitinhnam ? 'Nam' : 'Nữ'}</TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell component="th" className={classes.bordered}>
-                        <Typography variant="subtitle2">
-                            Ngày Sinh
+                            <Typography variant="subtitle2">
+                                Ngày Sinh
                         </Typography>
                         </TableCell>
                         <TableCell align="left" className={classes.bordered}>{chosingDoituong.ngaysinh}</TableCell>
@@ -102,7 +106,7 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow>
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            GCNTH Án
+                                GCNTH Án
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>{chosingDoituong.gcnthan}</TableCell>
@@ -110,7 +114,7 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow >
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            Nhân Thân
+                                Nhân Thân
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>{chosingDoituong.nhanthan}</TableCell>
@@ -118,7 +122,7 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow >
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            Lịch Sử Nghề Nghiệp
+                                Lịch Sử Nghề Nghiệp
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>{chosingDoituong.lsnghe}</TableCell>
@@ -126,7 +130,7 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow >
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            Ghi Chú
+                                Ghi Chú
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>{chosingDoituong.ghichu}</TableCell>
@@ -134,15 +138,21 @@ function DetailsTable({ chosingDoituong }) {
                     <TableRow >
                         <TableCell component="th" className={classes.bordered}>
                             <Typography variant="subtitle2">
-                            Hình Ảnh
+                                Hình Ảnh
                             </Typography>
                         </TableCell>
                         <TableCell align="left" className={`${classes.bordered} ${classes.textWrapped}`}>
                             {chosingDoituong.hinhanhs != null && chosingDoituong.hinhanhs.length > 0 ? chosingDoituong.hinhanhs.map(i =>
                                 <React.Fragment>
                                     <Grid container>
-                                        <Grid item sm={3}>  
-                                            <Typography>- {i.thoigian != null && i.thoigian.split('-').reverse().join('/')}</Typography>
+                                        <Grid item sm={3}>
+                                            <Chip
+                                                icon={<AccessTimeIcon />}
+                                                label={i.thoigian != null && i.thoigian.split('-').reverse().join('/')}
+                                                color="primary"
+                                                variant="outlined"
+                                            />
+                                            {/* <Typography>- {i.thoigian != null && i.thoigian.split('-').reverse().join('/')}</Typography> */}
                                         </Grid>
                                         <Grid item sm={9}>
                                             <img src={'/images/' + i.hinhanh} style={{ height: 'auto', width: 'auto', maxWidth: '100%' }}></img>

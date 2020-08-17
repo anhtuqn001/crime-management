@@ -150,10 +150,15 @@ function LoginPage() {
             control={<Checkbox value="remember" color="primary" />}
             label="Ghi Nhớ"
           /> */}
-          {isErrorShowed
+          {isErrorShowed 
            ? <Alert variant="filled" severity="error">
-            Tên đăng nhập hoặc mật khẩu không đúng — <strong>Vui lòng kiểm tra lại!</strong>
-          </Alert> : ''}
+            {<Typography variant="subtitle2">
+              - Tên đăng nhập hoặc mật khẩu không đúng
+            </Typography>}
+            {<Typography variant="subtitle2">
+              - Vui lòng kiểm tra lại
+            </Typography>}  
+            </Alert> : ''}
           <Button
             type="submit"
             fullWidth

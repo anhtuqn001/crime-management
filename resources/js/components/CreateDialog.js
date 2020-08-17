@@ -85,7 +85,7 @@ function TabPanel(props) {
   return (
     <div
       role="tabpanel"
-      hidden={value !== index}
+      hidden={value !== index}s
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
     >
@@ -111,7 +111,7 @@ function a11yProps(index) {
 function CreateDialog({ isOpen, hideCreateDialog, showSuccessSnackBar, prependDoituong }) {
   const classes = useStyles();
 
-  const [ngaysinh, setNgaysinh] = useState(new Date());
+  const [ngaysinh, setNgaysinh] = useState(new Date(1995, 11, 31));
   const [isLoading, setLoader] = useState(false);
   const [errors, setErrors] = useState([]);
 

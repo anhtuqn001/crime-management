@@ -91,6 +91,7 @@ class MainContent extends React.Component {
                 isLoaded: true
               });
             if(error.status == 401) {
+              localStorage.removeItem("token");
               history.push('/dangnhap');
             }
             }

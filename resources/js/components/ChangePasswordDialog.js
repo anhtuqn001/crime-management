@@ -12,6 +12,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { Alert } from '@material-ui/lab';
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import {
+    useHistory
+} from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
     root: {
         '& > *': {
@@ -44,6 +47,7 @@ function ChangePasswordDialog({ isOpen, hideChangePasswordDialog, idTaikhoan, sh
     const [password2, setPassword2] = useState('');
     const [errors, setErrors] = useState([]);
     const [isLoading, setLoader] = useState(false);
+    let history = useHistory();
 
     function handlePassword1Change(e) {
         setPassword1(e.target.value);
@@ -85,14 +89,22 @@ function ChangePasswordDialog({ isOpen, hideChangePasswordDialog, idTaikhoan, sh
                 .then((data) => {
                   setLoader(false);
                   localStorage.removeItem('token');
-                  hideChangePasswordDialog();
+                  hideChangePasswordDialogChild();
                   showSuccessChangePasswordDialogOpen();
                 })
                 .catch((error) => {
-                  console.log('Request failed', error);
+                    if (error.status == 401) {
+                        localStorage.removeItem("token");
+                        history.push('/dangnhap');
+                    }
                 });
         }
     }
+
+    function hideChangePasswordDialogChild() {
+        setErrors([]);
+        hideChangePasswordDialog();
+    } 
     return (
         <div>
             <Dialog
@@ -140,7 +152,7 @@ function ChangePasswordDialog({ isOpen, hideChangePasswordDialog, idTaikhoan, sh
                     <Button variant="outlined" color="primary" className={classes.button} onClick={changePassword} disabled={isLoading}>
                     {isLoading ? <CircularProgress color="primary" size={24} className={classes.loader} /> : "Thay đổi"}
                     </Button>
-                    <Button variant="outlined" onClick={hideChangePasswordDialog} autoFocus>
+                    <Button variant="outlined" onClick={hideChangePasswordDialogChild} autoFocus>
                         Hủy Bỏ
             </Button>
                 </DialogActions>
