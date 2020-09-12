@@ -65,7 +65,7 @@ class DoiTuongController extends Controller
             catch(Exception $e) {
                 return response()->json([
                     'error'=> $e->getMessage()
-                    ]);
+                ], 500);
             }
             $doituong->ngaysinh = date('d/m/Y', strtotime($doituong->ngaysinh));
             $doituong->hinhanhs = $doituong->hinhanhs()->orderBy('thoigian', 'ASC')->get();
